@@ -40,13 +40,11 @@ instance Show Tree where
         foldl Strings.(++) "" (map (showTree (depth+1)) t)
 
 
-allsubdirs:String->PIO $ List String
-allsubdirs r= do 
-            ds<-subdirs r
-            sds<- sequence $ map allsubdirs ds
-            return $ ds ++ concat sds
-
-
+dirTree:String->PIO Tree
+dirTree r= do
+  ds<-subdirs r
+  trees<-sequence $ map dirTree ds
+  return $ Node r trees
 
 main : PIO ()
 main = do 
@@ -54,5 +52,5 @@ main = do
   dirs<-subdirs ".."
   putStrLn' $ show dirs 
   putStrLn' $ show testTree
-  (map show (allsubdirs ".")) >>=putStrLn'
+  (map show (dirTree ".")) >>=putStrLn'
 
