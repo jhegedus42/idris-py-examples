@@ -39,12 +39,19 @@ instance Show Tree where
       showTree depth (Node s t) =indent depth++s++ "\n"++
         foldl Strings.(++) "" (map (showTree (depth+1)) t)
 
-
 dirTree:String->PIO Tree
 dirTree r= do
-  ds<-subdirs r
+  ds'<-subdirs r
+  let ds=map ((r++"/")++) ds'
   trees<-sequence $ map dirTree ds
   return $ Node r trees
+
+allsubdirs:String->PIO $ List String
+allsubdirs r = do
+     ds'<-subdirs r
+     let ds=map ((r++"/")++) ds'
+     sds<- sequence $ map allsubdirs ds
+     return $ ds ++ concat sds
 
 main : PIO ()
 main = do 
@@ -53,4 +60,5 @@ main = do
   putStrLn' $ show dirs 
   putStrLn' $ show testTree
   (map show (dirTree ".")) >>=putStrLn'
+  (map show (allsubdirs ".")) >>=putStrLn'
 
